@@ -123,6 +123,41 @@ public class GradeBookController {
 		
 		registrationService.sendFinalGrades(course_id, cdto);
 	}
+
+	@PostMapping("/assignment")
+	@Transactional
+	public void calcFinalGrades(@RequestBody GradebookDTO gradebook) {
+		System.out.println("Gradebook - calcFinalGrades for course " + course_id);
+
+		// check that this request is from the course instructor
+		String email = "dwisneski@csumb.edu";  // user name (should be instructor's email)
+
+		Course c = courseRepository.findById(course_id).orElse(null);
+		if (!c.getInstructor().equals(email)) {
+			throw new ResponseStatusException( HttpStatus.UNAUTHORIZED, "Not Authorized. " );
+		}
+
+		CourseDTOG cdto = new CourseDTOG();
+		cdto.course_id = course_id;
+		cdto.grades = new ArrayList<>();
+		for (Enrollment e: c.getEnrollments()) {
+			double total=0.0;
+			int count = 0;
+			for (AssignmentGrade ag : e.getAssignmentGrades()) {
+				count++;
+				total = total + Double.parseDouble(ag.getScore());
+			}
+			double average = total/count;
+			CourseDTOG.GradeDTO gdto = new CourseDTOG.GradeDTO();
+			gdto.grade=letterGrade(average);
+			gdto.student_email=e.getStudentEmail();
+			gdto.student_name=e.getStudentName();
+			cdto.grades.add(gdto);
+			System.out.println("Course="+course_id+" Student="+e.getStudentEmail()+" grade="+gdto.grade);
+		}
+
+		registrationService.sendFinalGrades(course_id, cdto);
+	}
 	
 	private String letterGrade(double grade) {
 		if (grade >= 90) return "A";
