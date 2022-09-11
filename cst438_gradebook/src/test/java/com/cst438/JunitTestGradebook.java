@@ -174,13 +174,6 @@ public class JunitTestGradebook {
 		course.setEnrollments(new java.util.ArrayList<Enrollment>());
 		course.setAssignments(new java.util.ArrayList<Assignment>());
 
-		Enrollment enrollment = new Enrollment();
-		enrollment.setCourse(course);
-		course.getEnrollments().add(enrollment);
-		enrollment.setId(TEST_COURSE_ID);
-		enrollment.setStudentEmail(TEST_STUDENT_EMAIL);
-		enrollment.setStudentName(TEST_STUDENT_NAME);
-
 		Assignment assignment = new Assignment();
 		assignment.setCourse(course);
 		course.getAssignments().add(assignment);
