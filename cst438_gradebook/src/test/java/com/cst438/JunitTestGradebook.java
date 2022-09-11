@@ -229,16 +229,16 @@ public class JunitTestGradebook {
 		
 		given(assignmentRepository.findById(assignment.getId())).willReturn(Optional.of(assignment));
 
-		// then do an http post request to create an assignment.
+		// then do an http post request to update an assignment name.
 		response = mvc
 				.perform(MockMvcRequestBuilders.put("/assignment/" + assignment.getId()).content(asJsonString(newAssignmentDTO))
 						.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
 				.andReturn().getResponse();
 
-		// verify that we get a successful response from the post request.
+		// verify that we get a successful response from the put request.
 		assertEquals(200, response.getStatus());
 
-		// verify that a save was called on repository
+		// verify that an update was called on repository
 		verify(assignmentRepository, times(1)).updateAssignmentName(newAssignmentName, assignment.getId());
 	}
 	
@@ -269,15 +269,15 @@ public class JunitTestGradebook {
 
 		given(assignmentRepository.findById(assignment.getId())).willReturn(Optional.of(assignment));
 
-		// then do an http post request to create an assignment.
+		// then do an http post request to delete an assignment.
 		response = mvc
 				.perform(MockMvcRequestBuilders.delete("/assignment/" + assignment.getId()).accept(MediaType.APPLICATION_JSON))
 				.andReturn().getResponse();
 
-		// verify that we get a successful response from the post request.
+		// verify that we get a successful response from the delete request.
 		assertEquals(200, response.getStatus());
 
-		// verify that a save was called on repository
+		// verify that a delete was called on the repository
 		verify(assignmentRepository, times(1)).deleteById(assignment.getId());
 	}
 
