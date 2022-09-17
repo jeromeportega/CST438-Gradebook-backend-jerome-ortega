@@ -21,6 +21,7 @@ import java.util.Optional;
 
 import com.cst438.controllers.GradeBookController;
 import com.cst438.domain.Assignment;
+import com.cst438.domain.AssignmentDTO;
 import com.cst438.domain.AssignmentGrade;
 import com.cst438.domain.AssignmentGradeRepository;
 import com.cst438.domain.AssignmentRepository;
@@ -157,6 +158,127 @@ public class JunitTestGradebook {
 
 		// verify that repository saveAll method was called
 		verify(assignmentGradeRepository, times(1)).save(updatedag);
+	}
+
+	@Test
+	public void createAssignment() throws Exception {
+
+		MockHttpServletResponse response;
+
+		// mock database data
+		Course course = new Course();
+		course.setCourse_id(TEST_COURSE_ID);
+		course.setSemester(TEST_SEMESTER);
+		course.setYear(TEST_YEAR);
+		course.setInstructor(TEST_INSTRUCTOR_EMAIL);
+		course.setEnrollments(new java.util.ArrayList<Enrollment>());
+		course.setAssignments(new java.util.ArrayList<Assignment>());
+
+		Assignment assignment = new Assignment();
+		assignment.setCourse(course);
+		course.getAssignments().add(assignment);
+		// set dueDate to 1 week before now.
+		assignment.setDueDate(new java.sql.Date(System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000));
+		assignment.setId(1);
+		assignment.setName("Assignment 1");
+		assignment.setNeedsGrading(1);
+		
+		given(courseRepository.findById(TEST_COURSE_ID)).willReturn(Optional.of(course));
+
+		AssignmentDTO newAssignmentDTO = new AssignmentDTO(TEST_COURSE_ID, assignment.getName(),
+				assignment.getDueDate().toString(), course.getTitle());
+
+		// then do an http post request to create an assignment.
+		response = mvc
+				.perform(MockMvcRequestBuilders.post("/assignment").content(asJsonString(newAssignmentDTO))
+						.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+				.andReturn().getResponse();
+
+		// verify that we get a successful response from the post request.
+		assertEquals(200, response.getStatus());
+
+		// verify that a save was called on repository
+		verify(assignmentRepository, times(1)).insertAssignment(assignment.getName(), assignment.getDueDate().toString(), TEST_COURSE_ID);
+	}
+	
+	@Test
+	public void updateAssignmentName() throws Exception {
+
+		MockHttpServletResponse response;
+
+		// mock database data
+		Course course = new Course();
+		course.setCourse_id(TEST_COURSE_ID);
+		course.setSemester(TEST_SEMESTER);
+		course.setYear(TEST_YEAR);
+		course.setInstructor(TEST_INSTRUCTOR_EMAIL);
+		course.setEnrollments(new java.util.ArrayList<Enrollment>());
+		course.setAssignments(new java.util.ArrayList<Assignment>());
+
+		Assignment assignment = new Assignment();
+		assignment.setCourse(course);
+		course.getAssignments().add(assignment);
+		// set dueDate to 1 week before now.
+		assignment.setDueDate(new java.sql.Date(System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000));
+		assignment.setId(1);
+		assignment.setName("Assignment 1");
+		assignment.setNeedsGrading(1);
+
+		String newAssignmentName = "This is a new name!";
+		AssignmentDTO newAssignmentDTO = new AssignmentDTO(newAssignmentName);
+		
+		given(assignmentRepository.findById(assignment.getId())).willReturn(Optional.of(assignment));
+
+		// then do an http post request to update an assignment name.
+		response = mvc
+				.perform(MockMvcRequestBuilders.put("/assignment/" + assignment.getId()).content(asJsonString(newAssignmentDTO))
+						.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON))
+				.andReturn().getResponse();
+
+		// verify that we get a successful response from the put request.
+		assertEquals(200, response.getStatus());
+
+		// verify that an update was called on repository
+		verify(assignmentRepository, times(1)).updateAssignmentName(newAssignmentName, assignment.getId());
+	}
+	
+	@Test
+	public void deleteAssignment() throws Exception {
+
+		MockHttpServletResponse response;
+
+		// mock database data
+		Course course = new Course();
+		course.setCourse_id(TEST_COURSE_ID);
+		course.setSemester(TEST_SEMESTER);
+		course.setYear(TEST_YEAR);
+		course.setInstructor(TEST_INSTRUCTOR_EMAIL);
+		course.setEnrollments(new java.util.ArrayList<Enrollment>());
+		course.setAssignments(new java.util.ArrayList<Assignment>());
+
+		Assignment assignment = new Assignment();
+		assignment.setCourse(course);
+		course.getAssignments().add(assignment);
+		// set dueDate to 1 week before now.
+		assignment.setDueDate(new java.sql.Date(System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000));
+		assignment.setId(1);
+		assignment.setName("Assignment 1");
+		assignment.setNeedsGrading(1);
+
+		String newAssignmentName = "This is a new name!";
+
+		given(assignmentRepository.findById(assignment.getId())).willReturn(Optional.of(assignment));
+
+		// then do an http post request to delete an assignment.
+		response = mvc
+				.perform(MockMvcRequestBuilders.delete("/assignment/" + assignment.getId()).accept(MediaType.APPLICATION_JSON))
+				.andReturn().getResponse();
+
+		// verify that we get a successful response from the delete request.
+		assertEquals(200, response.getStatus());
+
+		// verify that a delete was called on the repository
+		verify(assignmentRepository, times(1)).deleteById(assignment.getId());
 	}
 
 	@Test
