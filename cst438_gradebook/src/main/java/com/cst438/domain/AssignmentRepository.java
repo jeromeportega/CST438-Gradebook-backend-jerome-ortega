@@ -19,12 +19,4 @@ public interface AssignmentRepository extends CrudRepository <Assignment, Intege
 	@Modifying
 	@Query("update Assignment a set a.name = :assignmentName where a.id = :assignmentId")
 	void updateAssignmentName(@Param("assignmentName") String assignmentName, @Param("assignmentId") int assignmentId);
-	
-	/**
-		public int assignmentId;
-		public String assignmentName;
-		public String dueDate;
-		public String courseTitle;
-		public int courseId;
-	 */
 }
