@@ -35,7 +35,6 @@ public class RegistrationServiceMQ extends RegistrationService {
 	@Autowired
 	Queue registrationQueue;
 
-
 	// ----- end of configuration of message queue
 
 	// receiver of messages from Registration service
@@ -45,15 +44,15 @@ public class RegistrationServiceMQ extends RegistrationService {
 	public void receive(EnrollmentDTO enrollmentDTO) {
 		
 		//TODO  complete this method in homework 4
+		rabbitTemplate.convertAndSend(enrollmentDTO);
 		
 	}
 
 	// sender of messages to Registration Service
 	@Override
-	public void sendFinalGrades(int course_id, CourseDTOG courseDTO) {
+	public void sendFinalGrades(int course_id, CourseDTOG courseDTOG) {
 		 
 		//TODO  complete this method in homework 4
-		
 	}
 
 }
