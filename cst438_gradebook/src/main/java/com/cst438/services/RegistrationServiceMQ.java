@@ -63,6 +63,7 @@ public class RegistrationServiceMQ extends RegistrationService {
 	@Override
 	public void sendFinalGrades(int course_id, CourseDTOG courseDTOG) {
 		// Converting courseDTOG and sending to the registrationQueue.
+		System.out.println("Sending final grades via RABBITMQ");
 		rabbitTemplate.convertAndSend(registrationQueue.getName(), courseDTOG);
 	}
 	
