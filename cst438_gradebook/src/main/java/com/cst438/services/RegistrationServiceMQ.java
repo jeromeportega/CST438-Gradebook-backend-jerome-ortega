@@ -44,7 +44,7 @@ public class RegistrationServiceMQ extends RegistrationService {
 	@RabbitListener(queues = "gradebook-queue")
 	@Transactional
 	public void receive(EnrollmentDTO enrollmentDTO) {
-		System.out.println("Adding enrollment for student: " + enrollmentDTO.studentEmail);
+		System.out.println("Adding enrollment for student via RABBITMQ: " + enrollmentDTO.studentEmail);
 
 		// Check that the course exists before inserting the enrollment.
 		Course course = checkCourseExists(enrollmentDTO.course_id);
@@ -80,5 +80,4 @@ public class RegistrationServiceMQ extends RegistrationService {
 
 		return course;
 	}
-
 }
