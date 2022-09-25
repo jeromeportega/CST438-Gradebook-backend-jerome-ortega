@@ -44,8 +44,6 @@ public class RegistrationServiceMQ extends RegistrationService {
 	@RabbitListener(queues = "gradebook-queue")
 	@Transactional
 	public void receive(EnrollmentDTO enrollmentDTO) {
-		
-		//TODO  complete this method in homework 4
 		System.out.println("Adding enrollment for student: " + enrollmentDTO.studentEmail);
 
 		// Check that the course exists before inserting the enrollment.
