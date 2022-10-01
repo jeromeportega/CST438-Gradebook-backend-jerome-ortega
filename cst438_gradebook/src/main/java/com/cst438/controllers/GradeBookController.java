@@ -135,7 +135,7 @@ public class GradeBookController {
 		// check that this request is from the course instructor
 		String email = "dwisneski@csumb.edu"; // user name (should be instructor's email)
 
-		Course c = courseRepository.findById(assignment.courseId).orElse(null);
+		Course c = checkCourse(assignment.courseId, email);
 		if (!c.getInstructor().equals(email)) {
 			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not Authorized. ");
 		}
@@ -213,6 +213,20 @@ public class GradeBookController {
 		}
 
 		return assignment;
+	}
+	
+	private Course checkCourse(int courseId, String email) {
+		// get assignment
+		Course course = courseRepository.findById(courseId).orElse(null);
+		if (course == null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Course not found. " + courseId);
+		}
+		// check that user is the course instructor
+		if (!course.getInstructor().equals(email)) {
+			throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not Authorized. ");
+		}
+
+		return course;
 	}
 
 }
