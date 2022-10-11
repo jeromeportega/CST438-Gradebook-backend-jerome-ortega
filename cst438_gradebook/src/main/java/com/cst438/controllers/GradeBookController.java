@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,9 +49,9 @@ public class GradeBookController {
 
 	// get assignments for an instructor that need grading
 	@GetMapping("/gradebook")
-	public AssignmentListDTO getAssignmentsNeedGrading() {
+	public AssignmentListDTO getAssignmentsNeedGrading(@AuthenticationPrincipal OAuth2User principal) {
 
-		String email = "dwisneski@csumb.edu"; // user name (should be instructor's email)
+		String email = principal.getAttribute("email");
 
 		List<Assignment> assignments = assignmentRepository.findNeedGradingByEmail(email);
 		AssignmentListDTO result = new AssignmentListDTO();
@@ -61,9 +63,9 @@ public class GradeBookController {
 	}
 
 	@GetMapping("/gradebook/{id}")
-	public GradebookDTO getGradebook(@PathVariable("id") Integer assignmentId) {
+	public GradebookDTO getGradebook(@PathVariable("id") Integer assignmentId, @AuthenticationPrincipal OAuth2User principal) {
 
-		String email = "dwisneski@csumb.edu"; // user name (should be instructor's email)
+		String email = principal.getAttribute("email");
 		Assignment assignment = checkAssignment(assignmentId, email);
 
 		// get the enrollment for the course
@@ -94,11 +96,11 @@ public class GradeBookController {
 
 	@PostMapping("/course/{course_id}/finalgrades")
 	@Transactional
-	public void calcFinalGrades(@PathVariable int course_id) {
+	public void calcFinalGrades(@PathVariable int course_id, @AuthenticationPrincipal OAuth2User principal) {
 		System.out.println("Gradebook - calcFinalGrades for course " + course_id);
 
 		// check that this request is from the course instructor
-		String email = "dwisneski@csumb.edu"; // user name (should be instructor's email)
+		String email = principal.getAttribute("email");
 
 		Course c = courseRepository.findById(course_id).orElse(null);
 		if (!c.getInstructor().equals(email)) {
@@ -129,11 +131,11 @@ public class GradeBookController {
 
 	@PostMapping("/assignment")
 	@Transactional
-	public void createNewAssignment(@RequestBody AssignmentDTO assignment) {
+	public void createNewAssignment(@RequestBody AssignmentDTO assignment, @AuthenticationPrincipal OAuth2User principal) {
 		System.out.println("Gradebook - Course - Create New Assignment For Course " + assignment.courseId);
 
 		// check that this request is from the course instructor
-		String email = "dwisneski@csumb.edu"; // user name (should be instructor's email)
+		String email = principal.getAttribute("email");
 
 		Course c = checkCourse(assignment.courseId, email);
 		if (!c.getInstructor().equals(email)) {
@@ -157,10 +159,10 @@ public class GradeBookController {
 
 	@PutMapping("/assignment/{id}")
 	@Transactional
-	public void updateAssignmentName(@RequestBody AssignmentDTO assignment, @PathVariable("id") Integer assignmentId) {
+	public void updateAssignmentName(@RequestBody AssignmentDTO assignment, @PathVariable("id") Integer assignmentId, @AuthenticationPrincipal OAuth2User principal) {
 		System.out.println("Update Assignment Name by ID " + assignment.courseId);
 
-		String email = "dwisneski@csumb.edu"; // user name (should be instructor's email)
+		String email = principal.getAttribute("email");
 		checkAssignment(assignmentId, email); // check that user name matches instructor email of the course.
 
 		assignmentRepository.updateAssignmentName(assignment.assignmentName, assignmentId);
@@ -168,9 +170,9 @@ public class GradeBookController {
 
 	@PutMapping("/gradebook/{id}")
 	@Transactional
-	public void updateGradebook(@RequestBody GradebookDTO gradebook, @PathVariable("id") Integer assignmentId) {
+	public void updateGradebook(@RequestBody GradebookDTO gradebook, @PathVariable("id") Integer assignmentId, @AuthenticationPrincipal OAuth2User principal) {
 
-		String email = "dwisneski@csumb.edu"; // user name (should be instructor's email)
+		String email = principal.getAttribute("email");
 		checkAssignment(assignmentId, email); // check that user name matches instructor email of the course.
 
 		// for each grade in gradebook, update the assignment grade in database
@@ -192,10 +194,10 @@ public class GradeBookController {
 
 	@DeleteMapping("/assignment/{id}")
 	@Transactional
-	public void deleteAssignment(@PathVariable("id") Integer assignmentId) {
+	public void deleteAssignment(@PathVariable("id") Integer assignmentId, @AuthenticationPrincipal OAuth2User principal) {
 		System.out.println("Delete Assignment by ID: " + assignmentId);
 
-		String email = "dwisneski@csumb.edu"; // user name (should be instructor's email)
+		String email = principal.getAttribute("email");
 		checkAssignment(assignmentId, email); // check that user name matches instructor email of the course.
 
 		assignmentRepository.deleteById(assignmentId);
