@@ -33,15 +33,20 @@ public class Cst438GradebookApplication extends WebSecurityConfigurerAdapter {
 		SpringApplication.run(Cst438GradebookApplication.class, args);
 	}
 	
+	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		SimpleUrlAuthenticationFailureHandler handler = new SimpleUrlAuthenticationFailureHandler("/");
 		http.cors();
  		http.csrf(c -> c.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
  		// permit requests to /course without authentication. All other URLS are authenticated
  		http.authorizeRequests().mvcMatchers(HttpMethod.PUT, "/course").permitAll();
- 		http.antMatcher("/**").authorizeRequests( a -> a.antMatchers("/", "/home", "/login", "/webjars/**").permitAll()
- 		.anyRequest().authenticated())
- 		.exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+ 		http.antMatcher("/**")
+ 			.authorizeRequests( a -> a.antMatchers("/", "/home", "/login", "/webjars/**")
+				.permitAll()
+				.anyRequest()
+				.authenticated()
+			)
+ 			.exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
 		.logout(l -> l.logoutSuccessUrl("/").permitAll() )
  		.oauth2Login(o -> o.failureHandler((request, response, exception) -> {
  			System.out.println("error.message " + exception.getMessage());
